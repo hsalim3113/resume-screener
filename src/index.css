@@ -33,6 +33,10 @@ html, body {
 
 body {
   background-color: var(--bg);
+  /* Subtle radial glows add depth without being distracting */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(74, 222, 128, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 110%, rgba(74, 222, 128, 0.03) 0%, transparent 50%);
   color: var(--text);
   font-family: "DM Mono", monospace;
   font-weight: 400;
@@ -48,17 +52,24 @@ h1, h2, h3 {
   line-height: 1.2;
 }
 
+/* ── Page load animation ── */
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── App shell ── */
 .app {
   min-height: 100vh;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 48px 24px 80px;
+  padding: 56px 24px 96px;
+  animation: page-fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* ── Header ── */
 .app-header {
-  margin-bottom: 48px;
+  margin-bottom: 56px;
 }
 
 .app-title {
@@ -99,12 +110,15 @@ h1, h2, h3 {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 28px;
+  padding: 32px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 /* ── Form fields ── */
 .field {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .field-label {
@@ -146,6 +160,7 @@ h1, h2, h3 {
 }
 
 .upload-area--selected {
+  border-style: solid;
   border-color: var(--accent);
   background: var(--accent-dim);
   color: var(--accent);
@@ -157,8 +172,10 @@ h1, h2, h3 {
   color: var(--text-muted);
 }
 
-.upload-area--selected .upload-icon {
-  display: none;
+.upload-checkmark {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--accent);
 }
 
 .upload-hint {
@@ -168,6 +185,13 @@ h1, h2, h3 {
 .upload-filename {
   font-weight: 500;
   word-break: break-all;
+  font-size: 13px;
+}
+
+.upload-change {
+  font-size: 11px;
+  color: rgba(74, 222, 128, 0.6);
+  margin-top: 2px;
 }
 
 /* ── Textarea ── */
@@ -192,6 +216,16 @@ h1, h2, h3 {
 
 .textarea::placeholder {
   color: var(--text-muted);
+}
+
+/* ── Word counter ── */
+.word-counter {
+  margin-top: 6px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: "DM Mono", monospace;
+  letter-spacing: 0.03em;
 }
 
 /* ── Submit button ── */
@@ -271,12 +305,42 @@ h1, h2, h3 {
 
 /* ── Results panel ── */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 .fade-in {
-  animation: fade-in 0.35s ease-out forwards;
+  animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Clear button — sits top-right of the results section */
+.results-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.btn-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    color var(--transition);
+}
+
+.btn-clear:hover {
+  border-color: var(--red);
+  color: var(--red);
 }
 
 .results-header {
@@ -366,18 +430,6 @@ h1, h2, h3 {
   line-height: 1;
   /* Undo the SVG rotate(-90deg) so the label reads upright */
   transform: none;
-}
-
-/* Keyframe for the ring draw animation.
-   stroke-dashoffset starts at the full circumference (ring invisible)
-   and ends at the calculated target offset (ring filled to score %). */
-@keyframes draw-ring {
-  from {
-    stroke-dashoffset: var(--circumference);
-  }
-  to {
-    stroke-dashoffset: var(--target-offset);
-  }
 }
 
 /* ── Recommendation badge ── */

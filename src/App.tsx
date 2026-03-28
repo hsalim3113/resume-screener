@@ -24,6 +24,11 @@ export default function App() {
   // A ref to the hidden <input type="file"> so the styled label can trigger it
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Derived word count — split on any whitespace run, ignore empty string from trim
+  const wordCount = jobDescription.trim()
+    ? jobDescription.trim().split(/\s+/).length
+    : 0;
+
   // --- Handlers ---
 
   // Called when the user picks a file via the input
@@ -31,6 +36,16 @@ export default function App() {
     const file = e.target.files?.[0] ?? null;
     setSelectedFile(file);
     setError(null);
+  }
+
+  // Resets all state back to the initial empty form
+  function handleClear() {
+    setSelectedFile(null);
+    setJobDescription("");
+    setResult(null);
+    setError(null);
+    // Also clear the file input's internal value so the same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   // Called on form submission — sends the file + job description to the API
@@ -105,7 +120,11 @@ export default function App() {
                 }}
               >
                 {selectedFile ? (
-                  <span className="upload-filename">{selectedFile.name}</span>
+                  <>
+                    <span className="upload-checkmark">✓</span>
+                    <span className="upload-filename">{selectedFile.name}</span>
+                    <span className="upload-change">Click to change</span>
+                  </>
                 ) : (
                   <>
                     <span className="upload-icon">↑</span>
@@ -129,6 +148,10 @@ export default function App() {
                 onChange={(e) => setJobDescription(e.target.value)}
                 rows={10}
               />
+              {/* Live word counter updates as the user types */}
+              <div className="word-counter">
+                {wordCount} {wordCount === 1 ? "word" : "words"}
+              </div>
             </div>
 
             {/* Submit button */}
@@ -164,6 +187,13 @@ export default function App() {
           {/* Results panel — only rendered once the API responds successfully */}
           {result && !isLoading && (
             <div className="results fade-in">
+
+              {/* Clear button — resets the form so the user can screen a new resume */}
+              <div className="results-actions">
+                <button className="btn-clear" onClick={handleClear} type="button">
+                  ✕ Clear
+                </button>
+              </div>
 
               {/* Score + recommendation row */}
               <div className="results-header">

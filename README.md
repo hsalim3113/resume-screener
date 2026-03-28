@@ -1,19 +1,27 @@
 # Resume Screener
 
-An AI-powered CV screening tool that matches a candidate's resume against a job description and returns a structured analysis — including a match score, strengths, gaps, and a hiring recommendation.
+> AI-powered CV screening — upload a resume, paste a job description, get a structured match analysis in seconds.
 
-![Screenshot placeholder](https://via.placeholder.com/900x500/111111/4ade80?text=Resume+Screener+Screenshot)
+[ screenshot ]
+
+---
+
+## How it works
+
+1. **Upload a CV** — drag in any PDF resume
+2. **Paste the job description** — the full text from any job posting
+3. **Get AI analysis** — GPT-4o-mini returns a match score, strengths, skill gaps, and a hiring recommendation
 
 ---
 
 ## Tech Stack
 
-| Layer     | Technology                        |
-|-----------|-----------------------------------|
-| Frontend  | React 18, TypeScript, Vite        |
-| Backend   | FastAPI (Python)                  |
-| PDF Parse | PyMuPDF (fitz)                    |
-| AI Model  | OpenAI GPT-4o-mini                |
+| Layer       | Technology                          | Purpose                              |
+|-------------|-------------------------------------|--------------------------------------|
+| Frontend    | React 18 + TypeScript + Vite        | UI, state management, dev proxy      |
+| Backend     | FastAPI (Python)                    | REST API, request validation         |
+| PDF Parsing | PyMuPDF (`fitz`)                    | Extract text from uploaded PDFs      |
+| AI          | OpenAI GPT-4o-mini                  | Resume-to-JD matching and scoring    |
 
 ---
 
@@ -21,33 +29,58 @@ An AI-powered CV screening tool that matches a candidate's resume against a job 
 
 - **Node.js** 18+
 - **Python** 3.10+
-- An **OpenAI API key** — [get one here](https://platform.openai.com/api-keys)
+- An **OpenAI API key** — [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
 ---
 
-## Getting Started
+## Installation & Usage
 
-### 1. Start the backend
+### 1 — Backend
 
 ```bash
 cd server
 pip install -r requirements.txt
-cp .env.example .env          # then open .env and add your OPENAI_API_KEY
+cp .env.example .env        # add your OPENAI_API_KEY to .env
 uvicorn server:app --reload
 ```
 
-The API will be available at `http://localhost:8000`.
+API is now live at `http://localhost:8000`.
 
-### 2. Start the frontend
+### 2 — Frontend
 
-In a separate terminal, from the project root:
+Open a second terminal from the project root:
 
 ```bash
 npm install
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`.
+App is now live at `http://localhost:5173`.
+
+The Vite dev server proxies all `/api/*` requests to FastAPI, so no CORS configuration is needed in development.
+
+---
+
+## API
+
+| Method | Endpoint  | Body                                              | Returns          |
+|--------|-----------|---------------------------------------------------|------------------|
+| GET    | `/`       | —                                                 | Health check     |
+| POST   | `/screen` | `multipart/form-data`: `resume` (PDF), `job_description` (text) | `ScreeningResult` JSON |
+
+**Response schema:**
+
+```json
+{
+  "match_score": 82,
+  "summary": "Strong backend engineer with relevant Python experience...",
+  "strengths": ["FastAPI expertise", "Proven ML deployment", "..."],
+  "gaps": ["No TypeScript experience", "..."],
+  "recommendation": "Strong Match"
+}
+```
+
+`recommendation` is always one of: `"Strong Match"` · `"Potential Match"` · `"Not a Match"`
 
 ---
 
@@ -55,25 +88,25 @@ The app will be available at `http://localhost:5173`.
 
 ```
 resume-screener/
-├── index.html                  # HTML entry point, loads Google Fonts
+├── index.html                    # Entry point — loads Google Fonts, mounts React
 ├── package.json
 ├── tsconfig.json
-├── vite.config.ts              # Dev proxy: /api → http://localhost:8000
+├── vite.config.ts                # Dev proxy: /api → http://localhost:8000
 ├── .gitignore
 │
 ├── src/
-│   ├── main.tsx                # React entry point
-│   ├── App.tsx                 # Root component, state management
-│   ├── api.ts                  # screenResume() fetch wrapper
-│   ├── types.ts                # TypeScript interfaces
-│   ├── index.css               # Global dark-theme stylesheet
+│   ├── main.tsx                  # React entry — StrictMode mount
+│   ├── App.tsx                   # Root component, all state management
+│   ├── api.ts                    # screenResume() fetch wrapper
+│   ├── types.ts                  # TypeScript interfaces (ScreeningResult, etc.)
+│   ├── index.css                 # Dark theme stylesheet
 │   └── components/
-│       ├── ScoreCircle.tsx     # Animated SVG ring
+│       ├── ScoreCircle.tsx       # Animated SVG progress ring
 │       ├── RecommendationBadge.tsx
 │       └── LoadingSpinner.tsx
 │
 └── server/
-    ├── server.py               # FastAPI app
+    ├── server.py                 # FastAPI app — /screen endpoint
     ├── requirements.txt
     └── .env.example
 ```
@@ -82,8 +115,8 @@ resume-screener/
 
 ## Companion Projects
 
-- [AI Listing Generator — backend](https://github.com/hsalim3113/ai-listing-generator)
-- [AI Listing Generator — frontend](https://github.com/hsalim3113/ai-listing-frontend)
+- [ai-listing-generator](https://github.com/hsalim3113/ai-listing-generator) — FastAPI backend that generates property listings with GPT-4o
+- [ai-listing-frontend](https://github.com/hsalim3113/ai-listing-frontend) — React + Vite frontend for the listing generator
 
 ---
 

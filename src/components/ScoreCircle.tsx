@@ -1,5 +1,9 @@
 // ScoreCircle renders an animated SVG ring showing the match score (0–100).
-// The ring fills from 0 to the score value on mount via a CSS animation.
+// The ring transitions from empty to the score value only after the component
+// mounts — guaranteeing the animation fires when the results panel appears,
+// not on page load.
+
+import { useEffect, useState } from "react";
 
 interface ScoreCircleProps {
   score: number; // integer 0–100
@@ -13,6 +17,18 @@ function getColor(score: number): string {
 }
 
 export default function ScoreCircle({ score }: ScoreCircleProps) {
+  // mounted starts false so the ring renders as empty (strokeDashoffset = circumference).
+  // After the first animation frame, mounted becomes true, which updates strokeDashoffset
+  // to targetOffset and lets the CSS transition animate the fill smoothly.
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // requestAnimationFrame ensures the browser paints the empty state first
+    // before the transition begins, so the fill always animates from 0
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   const size = 160;
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
@@ -38,7 +54,7 @@ export default function ScoreCircle({ score }: ScoreCircleProps) {
           stroke="#1f1f1f"
           strokeWidth={strokeWidth}
         />
-        {/* Animated progress ring */}
+        {/* Progress ring — CSS transition handles the fill animation */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -48,15 +64,14 @@ export default function ScoreCircle({ score }: ScoreCircleProps) {
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          // CSS custom properties let the keyframe animation reference the target offset
-          style={
-            {
-              "--circumference": circumference,
-              "--target-offset": targetOffset,
-              strokeDashoffset: targetOffset,
-              animation: "draw-ring 1s ease-out forwards",
-            } as React.CSSProperties
-          }
+          style={{
+            // Before mounted: ring is invisible (offset = full circumference)
+            // After mounted:  ring fills to the score (offset = targetOffset)
+            strokeDashoffset: mounted ? targetOffset : circumference,
+            transition: mounted
+              ? "stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1)"
+              : "none",
+          }}
         />
       </svg>
 
