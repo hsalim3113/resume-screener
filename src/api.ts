@@ -14,7 +14,7 @@ export async function screenResume(
 
   // The request goes to /api/screen; Vite's dev proxy rewrites this to
   // http://localhost:8000/screen, so the backend never needs to know about /api.
-  const response = await fetch("/api/screen", {
+  const response = await fetch("https://fulfilling-empathy-production.up.railway.app/screen", {
     method: "POST",
     body: formData,
     // Do NOT set Content-Type manually — the browser sets it automatically
